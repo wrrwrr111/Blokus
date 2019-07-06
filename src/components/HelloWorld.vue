@@ -10,7 +10,7 @@
       </table>
       <table style="z-index:1;position:absolute" v-if="selectedPiece">
         <tr v-for="(row,y) in board.previewMatrix.valueOf()" :key="y" class="board row">
-          <td v-for="(col,x) in row" :key="x" class="board col" :class="col?'red':''" @mouseover="test(x,y,selectedPiece)" @click="move()">
+          <td v-for="(col,x) in row" :key="x" class="board col" :class="col?'red':''" @mouseover="test(x,y)" @click="move()">
             {{col}}
           </td>
         </tr>
@@ -64,8 +64,8 @@ export default {
     this.players.push(new blokus.Player(1,this.board))
   },
   methods: {
-    test(row, col,selectedPiece) {
-      this.players[0].tryMove(row, col,selectedPiece)
+    test(row, col) {
+      this.players[0].tryMove(row, col,this.selectedPiece,this.selectedIndex)
     },
     move(){
       this.players[0].move()

@@ -2,7 +2,7 @@
  * @Author: Baze
  * @Date:   2019-07-04 11:48:15
  * @Last Modified by:   Baze
- * @Last Modified time: 2019-07-07 00:02:24
+ * @Last Modified time: 2019-07-07 00:08:12
  */
 
 import math from 'mathjs/dist/math.js'
@@ -45,6 +45,7 @@ class Board {
           this.boardMatrix.set([point.y, point.x], 1)
       }
       this.initTry()
+      return true
     }
   }
 }
@@ -154,11 +155,15 @@ class Player {
       this.pieces.push(new Piece(pieceData, userId))
     })
   }
-  tryMove(row, col,selectedPiece){
+  tryMove(row, col,selectedPiece,selectedIndex){
+    this.tryIndex = selectedIndex
     this.board.tryMove(row, col,selectedPiece)
   }
   move(){
-    this.board.move()
+    let flag = this.board.move()
+    console.log(this.tryIndex)
+    if(flag)
+      this.pieces.splice(this.tryIndex,1)
   }
 }
 
