@@ -2,7 +2,7 @@
  * @Author: Baze
  * @Date:   2019-07-04 11:48:15
  * @Last Modified by:   Baze
- * @Last Modified time: 2019-07-07 00:08:12
+ * @Last Modified time: 2019-07-17 18:52:15
  */
 
 import math from 'mathjs/dist/math.js'
@@ -19,13 +19,15 @@ class Board {
     this.tryY = 0
     this.tryPiece = null
   }
-  tryMove(row, col, piece) {
+  tryMove(row, col, piece,userId) {
+    console.log(row,col,piece,userId)
     let matrix = math.zeros(20, 20)
     let translation = new Point(row - 2, col - 2)
     let points = piece.translate(translation)
+    console.log(points)
     for (let point of points) {
       if (point.x < 20 && point.x >= 0 && point.y < 20 && point.y >= 0) {
-        matrix.set([point.y, point.x], 1)
+        matrix.set([point.y, point.x], userId)
       } else {
         return
       }
@@ -35,14 +37,14 @@ class Board {
     this.tryPiece = piece
     this.previewMatrix = matrix
   }
-  move() {
+  move(userId) {
     if (this.tryPiece) {
       let translation = new Point(this.tryX, this.tryY)
       let points = this.tryPiece.translate(translation)
 
       //todo 验证合法性
       for (let point of points) {
-          this.boardMatrix.set([point.y, point.x], 1)
+          this.boardMatrix.set([point.y, point.x], userId)
       }
       this.initTry()
       return true
@@ -54,7 +56,7 @@ class Board {
 class Piece {
   constructor(pieceData, userId) {
     this.userId = userId
-    this.matrixData = math.matrix(pieceData)
+    this.matrixData = math.multiply(math.matrix(pieceData),userId)
     this.pieceData = pieceData
     this.pointsData = pieceData.reduce(
       (array, row, y) => {
@@ -71,6 +73,7 @@ class Piece {
   }
   translate(translation) {
     return this.pointsData.map(point => {
+      console.log(point)
       let x0 = point.x
       let y0 = point.y
       let [
@@ -100,6 +103,7 @@ class Piece {
     let C = math.cos(rotation).toFixed()
     let S = math.sin(rotation).toFixed()
     let points = this.pointsData.map(point => {
+      console.log(point)
       //然后旋转
       let [
         [x1],
@@ -114,7 +118,8 @@ class Piece {
         [point.y],
         [1]
       ])
-      matrix.set([y1, x1], 1)
+      console.log(x1,y1,this.userId)
+      matrix.set([y1, x1], this.userId)
       return new Point(x1, y1)
     })
     this.pointsData = points
@@ -128,7 +133,7 @@ class Piece {
       //然后旋转
       let x1 = matrixSize[0] - 1 - point.x
       let y1 = point.y
-      matrix.set([y1, x1], 1)
+      matrix.set([y1, x1], this.userId)
       points.push(new Point(x1, y1))
     })
     this.pointsData = points
@@ -157,11 +162,11 @@ class Player {
   }
   tryMove(row, col,selectedPiece,selectedIndex){
     this.tryIndex = selectedIndex
-    this.board.tryMove(row, col,selectedPiece)
+    this.board.tryMove(row, col,selectedPiece,this.userId)
   }
   move(){
-    let flag = this.board.move()
-    console.log(this.tryIndex)
+    console.log("move",this.userId,this.tryIndex)
+    let flag = this.board.move(this.userId)
     if(flag)
       this.pieces.splice(this.tryIndex,1)
   }
