@@ -2,7 +2,7 @@
  * @Author: Baze
  * @Date:   2019-07-04 11:48:15
  * @Last Modified by:   Baze
- * @Last Modified time: 2019-07-17 18:52:15
+ * @Last Modified time: 2019-07-18 09:52:27
  */
 
 import math from 'mathjs/dist/math.js'
@@ -253,7 +253,7 @@ const pieceDatas = [
   ],
   [
     [0, 0, 0, 0, 0],
-    [0, 1, 0, 0, 0],
+    [0, 0, 1, 0, 0],
     [0, 1, 1, 1, 1],
     [0, 0, 0, 0, 0],
     [0, 0, 0, 0, 0]

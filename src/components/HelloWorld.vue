@@ -1,14 +1,14 @@
 <template>
   <div class="hello">
     <div v-if="board" style="height:400px">
-      <table style="z-index:0;position:absolute">
-        <tr v-for="(row,y) in board.boardMatrix.valueOf()" :key="y" class="board row">
-          <td v-for="(col,x) in row" :key="x" class="board col" :class="colClass[col]">
+      <table class="board" style="z-index:0;position:absolute">
+        <tr v-for="(row,y) in board.boardMatrix.valueOf()" :key="y"  class="row">
+          <td v-for="(col,x) in row" :key="x" class="col" :class="colClass[col]">
             <!-- {{col}} -->
           </td>
         </tr>
       </table>
-      <table style="z-index:1;position:absolute" v-if="selectedPiece">
+      <table class="board" style="z-index:1;position:absolute" v-if="selectedPiece">
         <tr v-for="(row,y) in board.previewMatrix.valueOf()" :key="y" class="board row">
           <td v-for="(col,x) in row" :key="x" class="board col" :class="colClass[col]" @mouseover="test(x,y)" @click="move()">
             <!-- {{col}} -->
@@ -101,7 +101,13 @@ export default {
     height: 16px;
     line-height: 16px;
 }
- .board{
+.board{
+  border-collapse:collapse;
+}
+ .board .row{
+  border: 1px solid black;
+ }
+ .board .col{
   border: 1px solid black;
  }
 
