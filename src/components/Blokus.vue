@@ -1,20 +1,22 @@
 <template>
-  <div class="hello">
-    <div v-if="board" style="height:400px">
-      <table class="board" style="z-index:0;position:absolute">
-        <tr v-for="(row,y) in board.boardMatrix.valueOf()" :key="y"  class="row">
-          <td v-for="(col,x) in row" :key="x" class="col" :class="colClass[col]">
+  <div class="blokus">
+    <div style="height:400px">
+      <div class="board" style="z-index:0;position:absolute">
+        <template v-for="(row,y) in board.boardMatrix.valueOf()">
+          <div v-for="(col,x) in row" :key="y*20+x" class="board_one" :class="colClass[col]">
             <!-- {{col}} -->
-          </td>
-        </tr>
-      </table>
-      <table class="board" style="z-index:1;position:absolute" v-if="selectedPiece">
-        <tr v-for="(row,y) in board.previewMatrix.valueOf()" :key="y" class="board row">
-          <td v-for="(col,x) in row" :key="x" class="board col" :class="colClass[col]" @mouseover="test(x,y)" @click="move()">
+          </div>
+          <div class="board_one -hidden">\n</div>
+        </template>
+      </div>
+      <div class="board" style="z-index:1;position:absolute" v-if="selectedPiece">
+        <template v-for="(row,y) in board.previewMatrix.valueOf()">
+          <div v-for="(col,x) in row" :key="y*20+x" class="board_one" :class="colClass[col]" @mouseover="test(x,y)" @click="move()">
             <!-- {{col}} -->
-          </td>
-        </tr>
-      </table>
+          </div>
+          <div class="board_one -hidden">\n</div>
+        </template>
+      </div>
       <table v-if="selectedPiece" style="position:absolute;left:450px">
         <tr v-for="(row,index) in selectedPiece.matrixData.valueOf()" :key="index" class="piece row">
           <td v-for="(col,index) in row" class="piece col" :class="colClass[col]">
@@ -49,14 +51,14 @@ import math from 'mathjs/dist/math.js'
 import blokus from '@/libs/blokus'
 
 export default {
-    name: 'HelloWorld',
+    name: 'Blokus',
     data() {
         return {
             // board: math.zeros(20, 20)
             board: new blokus.Board(),
             players: {},
             selectedPiece: null, //当前选中棋子
-            colClass: ['', 'red', 'yellow', 'blue', 'green'],
+            colClass: ['', 'red', 'orange', 'blue', 'green'],
         }
     },
     mounted() {
@@ -96,35 +98,53 @@ export default {
 </script>
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
- .col {
+body {
+    height: 100vh;
+    display: grid;
+    /*place-content:center;*/
+    background-color: #222222;
+}
+
+.col {
     width: 16px;
     height: 16px;
     line-height: 16px;
 }
-.board{
-  border-collapse:collapse;
+
+.board {
+  width: 20rem;
+  height: 20rem;
+  display: grid;
+  grid-template-columns: repeat(20, 1fr);
+  grid-template-rows: repeat(20, 1fr);
+  border: 1px solid currentColor;
+  cursor: pointer;
 }
- .board .row{
-  border: 1px solid black;
- }
- .board .col{
-  border: 1px solid black;
- }
+
+.board_one {
+  display: grid;
+  place-content: center;
+  border: 1px solid currentColor;
+}
+.board_one.-hidden {
+  display: none;
+}
+
 
 .red {
-    background-color: red;
+    background-color: #FF0000;
 }
 
-.yellow {
-    background-color: yellow;
+.orange {
+    background-color: #FF7400;
 }
 
 .blue {
-    background-color: blue;
+    background-color: #009999;
 }
 
 .green {
-    background-color: green;
+    background-color: #00cc00;
 }
 
 </style>
