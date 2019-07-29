@@ -5,11 +5,9 @@ import Blokus from '@/components/Blokus'
 Vue.use(Router)
 
 export default new Router({
-  routes: [
-    {
-      path: '/',
-      name: 'Blokus',
-      component: Blokus
-    }
-  ]
+    routes: [{
+        path: '/',
+        name: 'Blokus',
+        component: Blokus
+    }]
 })
