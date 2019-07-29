@@ -2,7 +2,7 @@
  * @Author: Baze
  * @Date:   2019-07-04 11:48:15
  * @Last Modified by:   Baze
- * @Last Modified time: 2019-07-29 18:48:11
+ * @Last Modified time: 2019-07-29 19:03:40
  */
 
 import math from 'mathjs/dist/math.js'
@@ -40,7 +40,7 @@ class Board {
         let translation = new Point(row - 2, col - 2)
         let points = piece.translate(translation)
         for (let point of points) {
-            if (point.x <=19 && point.x >= 0 && point.y <=19 && point.y >= 0) {
+            if (point.x <= 19 && point.x >= 0 && point.y <= 19 && point.y >= 0) {
                 matrix.set([point.y, point.x], userId)
             } else {
                 return
@@ -52,7 +52,7 @@ class Board {
         this.previewMatrix = matrix
     }
     move(userId, firstFlag) {
-        console.log("now player",this.players[userId])
+        console.log('now player', this.players[userId])
         if (this.tryPiece) {
             let translation = new Point(this.tryX, this.tryY)
             let points = this.tryPiece.translate(translation)
@@ -62,7 +62,7 @@ class Board {
             if (firstFlag) {
                 //  第一个必须从角落开始
                 let startPoint = this.startPoints[this.playerIds.indexOf(userId)]
-                console.log("first", startPoint)
+                console.log('first piece,start point:', startPoint)
                 flag = startPoint.isIn(points)
             } else {
                 //  后续的必须和之前
@@ -75,48 +75,48 @@ class Board {
                     // 空白
                     if (this.boardMatrix.get([point.y, point.x]) !== 0) {
                         blankFlag = false
-                        break;
+                        break
                     }
-                    //边不靠
-                    if (point.y + 1 <=19 && this.boardMatrix.get([point.y + 1, point.x]) == userId) {
+                    //  边不靠
+                    if (point.y + 1 <= 19 && this.boardMatrix.get([point.y + 1, point.x]) === userId) {
                         sideFlag = false
-                        break;
+                        break
                     }
-                    if (point.y - 1 >= 0 && this.boardMatrix.get([point.y - 1, point.x]) == userId) {
+                    if (point.y - 1 >= 0 && this.boardMatrix.get([point.y - 1, point.x]) === userId) {
                         sideFlag = false
-                        break;
+                        break
                     }
-                    if (point.x + 1 <=19 && this.boardMatrix.get([point.y, point.x + 1]) == userId) {
+                    if (point.x + 1 <= 19 && this.boardMatrix.get([point.y, point.x + 1]) === userId) {
                         sideFlag = false
-                        break;
+                        break
                     }
-                    if (point.x - 1 >= 0 && this.boardMatrix.get([point.y, point.x - 1]) == userId) {
+                    if (point.x - 1 >= 0 && this.boardMatrix.get([point.y, point.x - 1]) === userId) {
                         sideFlag = false
-                        break;
+                        break
                     }
-                    //角对角
-                    if (point.y + 1 <=19 &&
-                        point.x + 1 <=19 &&
-                        this.boardMatrix.get([point.y + 1, point.x + 1]) == userId) {
+                    //  角对角
+                    if (point.y + 1 <= 19 &&
+                        point.x + 1 <= 19 &&
+                        this.boardMatrix.get([point.y + 1, point.x + 1]) === userId) {
                         corFlag = true
                     }
-                    if (point.y + 1 <=19 &&
+                    if (point.y + 1 <= 19 &&
                         point.x - 1 >= 0 &&
-                        this.boardMatrix.get([point.y + 1, point.x - 1]) == userId) {
+                        this.boardMatrix.get([point.y + 1, point.x - 1]) === userId) {
                         corFlag = true
                     }
                     if (point.y - 1 >= 0 &&
-                        point.x + 1 <=19 &&
-                        this.boardMatrix.get([point.y-1, point.x + 1]) == userId) {
+                        point.x + 1 <= 19 &&
+                        this.boardMatrix.get([point.y - 1, point.x + 1]) === userId) {
                         corFlag = true
                     }
                     if (point.y - 1 >= 0 &&
                         point.x - 1 >= 0 &&
-                        this.boardMatrix.get([point.y-1, point.x-1]) == userId) {
+                        this.boardMatrix.get([point.y - 1, point.x - 1]) === userId) {
                         corFlag = true
                     }
                 }
-                console.log(corFlag , sideFlag , blankFlag)
+                console.log(corFlag, sideFlag, blankFlag)
                 flag = corFlag && sideFlag && blankFlag
             }
             if (flag) {
@@ -124,7 +124,7 @@ class Board {
                     this.boardMatrix.set([point.y, point.x], userId)
                 }
                 this.initTry()
-                this.step+=1
+                this.step += 1
                 return points.length
             } else {
                 return 0
@@ -235,7 +235,7 @@ class Point {
         return false
     }
     isEq(point) {
-        return this.x == point.x && this.y == point.y ? true : false
+        return this.x === point.x && this.y === point.y
     }
 }
 
@@ -245,7 +245,7 @@ class Player {
         this.board = board
         this.score = 0
         this.initPieces(userId)
-        this.board.addPlayer(userId,this)
+        this.board.addPlayer(userId, this)
     }
     initPieces(userId) {
         this.firstFlag = true // 是否落子
@@ -265,11 +265,12 @@ class Player {
         if (score) {
             this.firstFlag = false
             this.pieces.splice(this.tryIndex, 1)
-            //加分
+
+            //  加分
             this.score += score
-            if(this.pieces.length == 0&&score == 1){
+            if (this.pieces.length === 0 && score === 1) {
                 this.score += 20
-            }else if(this.pieces.length == 0){
+            } else if (this.pieces.length === 0) {
                 this.score += 15
             }
             return true

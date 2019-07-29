@@ -93,7 +93,7 @@ export default {
             selectedPiece: null, // 当前选中棋子
             colClass: ['', 'blue', 'yellow', 'red', 'green'],
             curId: 1,
-            text: '',
+            text: ''
         }
     },
     mounted() {
