@@ -72,8 +72,7 @@
         <p v-for="(player,index) in players" class="player" :key="index" :class="colClass[index]">
           {{"player"+player.userId +": " + player.score}}
         </p>
-        <p>提示</p>
-        <p>{{text}}</p>
+        <p v-if="text">提示:{{text}}</p>
       </div>
     </div>
   </div>
