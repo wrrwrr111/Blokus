@@ -1,0 +1,13 @@
+{
+  "name": "blokus-server",
+  "description": "Nodejs Multiplayer Game Server for blokus",
+  "repository": "",
+  "logo": "",
+  "keywords": ["node", "multiplayer", "colyseus", "blokus"],
+  "env": {
+    "NPM_CONFIG_PRODUCTION": {
+      "description": "Leave as 'false' to install required devDependencies.",
+      "value": "false"
+    }
+  }
+}

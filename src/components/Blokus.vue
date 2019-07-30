@@ -36,14 +36,14 @@
       </div>
       <div class="board" style="" v-if="selectedPiece">
         <template v-for="(row,y) in board.previewMatrix.valueOf()">
-          <div v-for="(col,x) in row" :key="y*20+x" class="cel" :class="colClass[col]" @mouseover="test(x,y)" @click="move()">
+          <div v-for="(col,x) in row" :key="y*20+x" class="cel" :class="colClass[col]" @mouseover="testMsg(selectedPiece.userId,x,y)" @click="moveMsg(selectedPiece.userId)">
             <!-- {{col}} -->
           </div>
           <div class="cel -hidden" :key="y+'n'">\n</div>
         </template>
       </div>
       <div v-for="(player,index) in players" class="player" :class="'player'+index" :key="index">
-        <div v-for="(piece,index) in player.pieces" class="piece" :key="index" @click="selectPiece(piece,index)">
+        <div v-for="(piece,index) in player.pieces" class="piece" :key="index" @click="selectPieceMsg(player.userId,index)">
           <template v-for="(row,y) in piece.matrixData.valueOf()">
             <div v-for="(col,x) in row" class="cel" :class="colClass[col]" :key="y*5+x">
               <!-- {{col}} -->
@@ -64,8 +64,8 @@
             <div class="cel -hidden" :key="y+'n'">\n</div>
           </template>
         </div>
-        <button @click="rotate" style="grid-area:btn1">旋转 rotate</button>
-        <button @click="mirror" style="grid-area:btn2">翻转 mirror</button>
+        <button @click="rotateMsg(selectedPiece.userId)" style="grid-area:btn1">旋转 rotate</button>
+        <button @click="mirrorMsg(selectedPiece.userId)" style="grid-area:btn2">翻转 mirror</button>
       </div>
       <div class="scoreboard">
         <p>记分板 scoreboard</p>
@@ -74,14 +74,29 @@
         </p>
         <p v-if="text">提示:{{text}}</p>
       </div>
+      <div class="room">
+        <template v-if="room">
+          <p>当前房间号: {{room.id}}</p>
+          <!-- <p>房间情况: {{room.clients}}/{{room.maxClients}}</p> -->
+          <button @click="leaveRoom">退出房间</button>
+        </template>
+        <template v-else>
+          <button @click="getAvailableRooms">刷新房间列表</button>
+          <button @click="createRoom">创建房间</button>
+          <ul>
+            <li v-for="(room,index) in rooms" :key="index">
+              {{room.roomId+' '+room.clients+'/'+room.maxClients}}
+              <button @click="joinByLastId(room.roomId)">加入</button>
+            </li>
+          </ul>
+        </template>
+      </div>
     </div>
   </div>
 </template>
 <script>
-// import math from 'mathjs/dist/math.js'
-
 import blokus from '@/libs/blokus'
-
+import * as Colyseus from 'colyseus.js'
 export default {
     name: 'Blokus',
     data() {
@@ -92,44 +107,169 @@ export default {
             selectedPiece: null, // 当前选中棋子
             colClass: ['', 'blue', 'yellow', 'red', 'green'],
             curId: 1,
-            text: ''
+            myId: 1,
+            text: '',
+            rooms: [],
+            room: null,
+            client: null
         }
     },
     mounted() {
-        this.players = {
-            1: new blokus.Player(1, this.board),
-            2: new blokus.Player(2, this.board),
-            3: new blokus.Player(3, this.board),
-            4: new blokus.Player(4, this.board)
-        }
+        // this.players = {
+        //     1: new blokus.Player(1, this.board),
+        //     2: new blokus.Player(2, this.board),
+        //     3: new blokus.Player(3, this.board),
+        //     4: new blokus.Player(4, this.board)
+        // }
+        this.initClient()
+        this.getAvailableRooms()
     },
     methods: {
-        test(row, col) {
-            let userId = this.selectedPiece.userId
-            console.log(userId)
+        // room
+        initClient() {
+            this.client = new Colyseus.Client('ws://140.143.2.208:2567')
+            console.log('client', this.client)
+        },
+        leaveRoom() {
+            this.room.leave()
+            this.room = null
+            this.getAvailableRooms()
+        },
+        createRoom() {
+            this.room = this.client.join('blokus-room', { create: true })
+            this.addListeners(this.room)
+        },
+        getAvailableRooms() {
+            this.client.getAvailableRooms('blokus-room', (rooms, err) => {
+                console.log("rooms[0]", rooms && rooms[0])
+                this.rooms = rooms
+            })
+        },
+        joinByLastId(roomId) {
+            this.room = this.client.join(roomId)
+            console.log("joinByLastId", roomId, this.room, this.client)
+            this.addListeners(this.room)
+            // this.getAvailableRooms()
+        },
+        //  添加事件监听
+        addListeners() {
+            let that = this
+            this.room.onJoin.add(function() {
+                console.log("joined");
+            });
+
+            this.room.onStateChange.add((state) => {
+                console.log("initial room state:", state, state.players);
+                that.initBoard()
+                that.initPlayers(state.players)
+            });
+
+            // 监听消息
+            this.room.onMessage.add((data) => {
+                if (data.type === 'selectPiece') {
+                    that.selectPiece(data.userId, data.pieceIndex)
+                }
+                if (data.type === 'test') {
+                    that.test(data.userId,data.row, data.col)
+                }
+                if (data.type === 'move') {
+                    that.move(data.userId)
+                }
+                if (data.type === 'rotate') {
+                    that.rotate(data.userId)
+                }
+                if (data.type === 'mirror') {
+                    that.mirror(data.userId)
+                }
+            });
+        },
+        //初始化棋盘
+        initBoard() {
+            this.board = new blokus.Board()
+        },
+        //初始化玩家
+        initPlayers(players) {
+            console.log(players)
+            for (let sessionId in players) {
+                let player = players[sessionId]
+                let index = player.index
+                console.log("player", player)
+                this.players[index] = new blokus.Player(index, this.board)
+                if(this.room.sessionId === sessionId){
+                    this.myId = index
+                    console.log("myId!!!",this.myId)
+                }
+            }
+        },
+        //  发送选中消息
+        selectPieceMsg(userId, pieceIndex) {
+            if (userId !== this.curId) {
+                this.text = '没轮到你'
+                return
+            }
+            if (userId !== this.myId) {
+                this.text = '不是你的'
+                return
+            }
+            this.text = ''
+            this.room.send({
+                type: 'selectPiece',
+                userId,
+                pieceIndex
+            })
+        },
+        selectPiece(userId, pieceIndex) {
+            this.selectedPiece = this.players[userId].pieces[pieceIndex]
+            this.selectedIndex = pieceIndex
+            this.board.initTry()
+        },
+        testMsg(userId, row, col) {
+            if (userId === this.myId) {
+                this.room.send({
+                    type: 'test',
+                    userId,
+                    row,
+                    col
+                })
+            }
+        },
+        test(userId, row, col) {
+            console.log(userId,row, col, this.selectedPiece, this.selectedIndex)
             this.players[userId].tryMove(row, col, this.selectedPiece, this.selectedIndex)
         },
-        move() {
-            let userId = this.selectedPiece.userId
+        moveMsg(userId){
+            if (userId === this.myId) {
+                this.room.send({
+                    type: 'move',
+                    userId
+                })
+            }
+        },
+        move(userId) {
             let flag = this.players[userId].move()
             if (flag) {
                 this.selectedPiece = null
                 this.curId = this.board.playerIds[this.board.step % this.board.playerIds.length]
             }
         },
-        selectPiece(piece, index) {
-            this.text = ''
-            if (piece.userId !== this.curId) {
-                this.text = '没轮到你'
-                return
+        rotateMsg(userId){
+            if (userId === this.myId) {
+                this.room.send({
+                    type: 'rotate',
+                    userId
+                })
             }
-            this.selectedPiece = piece
-            this.selectedIndex = index
-            this.board.initTry()
-            console.log(this.selectedPiece)
         },
         rotate() {
             this.selectedPiece && this.selectedPiece.rotate()
+        },
+        mirrorMsg(userId){
+            if (userId === this.myId) {
+                this.room.send({
+                    type: 'mirror',
+                    userId
+                })
+            }
         },
         mirror() {
             this.selectedPiece && this.selectedPiece.mirror()
@@ -144,7 +284,11 @@ body {
     height: 100vh;
     display: grid;
     /*place-content:center;*/
-    background-color: #222222;
+    /*background-color: #222222;*/
+}
+
+p {
+    margin-top: 1vmin;
 }
 
 .square {
@@ -157,6 +301,10 @@ body {
         "g1 g2  g3"
         "g4 g5  g6"
         "g7 g8  g9"
+}
+
+.room {
+    grid-area: g1;
 }
 
 .info {
@@ -230,6 +378,7 @@ body {
 .cel {
     place-content: center;
     border: 0.1vmin solid currentColor;
+    /*background-color: #aaaaaa;*/
 }
 
 .cel.-hidden {

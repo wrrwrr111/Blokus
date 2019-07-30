@@ -2,7 +2,7 @@
  * @Author: Baze
  * @Date:   2019-07-04 11:48:15
  * @Last Modified by:   Baze
- * @Last Modified time: 2019-07-29 19:03:40
+ * @Last Modified time: 2019-07-30 17:58:36
  */
 
 import math from 'mathjs/dist/math.js'
@@ -35,7 +35,7 @@ class Board {
         this.tryPiece = null
     }
     tryMove(row, col, piece, userId) {
-        console.log(row, col, piece, userId)
+        // console.log(row, col, piece, userId)
         let matrix = math.zeros(20, 20)
         let translation = new Point(row - 2, col - 2)
         let points = piece.translate(translation)
@@ -52,7 +52,7 @@ class Board {
         this.previewMatrix = matrix
     }
     move(userId, firstFlag) {
-        console.log('now player', this.players[userId])
+        console.log('now player', userId)
         if (this.tryPiece) {
             let translation = new Point(this.tryX, this.tryY)
             let points = this.tryPiece.translate(translation)
