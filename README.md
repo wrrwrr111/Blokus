@@ -2,9 +2,6 @@
 
 > web game blokus
 >
-> single player or local game demo
->
-> https://wrrwrr111.github.io/Blokus/
 
 ## Build Setup
 
