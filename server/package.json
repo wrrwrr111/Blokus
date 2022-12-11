@@ -11,7 +11,7 @@
   "dependencies": {
     "@colyseus/monitor": "^0.10.0",
     "colyseus": "^0.10.7",
-    "express": "^4.17.1",
+    "express": "^4.17.3",
     "nodemon": "^1.11.0",
     "serve-index": "^1.8.0",
     "superagent": "^3.8.1"
